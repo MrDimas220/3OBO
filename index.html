@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> ⚰️Конструктор труни </title>
+<style>
+  body{
+    font-family: Arial, sans-serif;
+    background: radial-gradient(circle at top, #f6f6f6, #cfcfcf);
+    padding: 20px;
+    margin: 0;
+  }
+
+  h1{
+    text-align:center;
+    margin: 10px 0 20px;
+  }
+
+  .wrap{
+    display:flex;
+    gap:30px;
+    justify-content:center;
+    align-items:flex-start;
+    flex-wrap: wrap;
+  }
+
+  .card{
+    background: rgba(255,255,255,0.92);
+    padding: 18px;
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+    backdrop-filter: blur(8px);
+  }
+
+  #scene{
+    width: 500px;
+    height: 700px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+
+  svg{
+    width: 430px;
+    height: 660px;
+    user-select:none;
+  }
+#coffin3D{
+  width:220px;
+  height:420px;
+  transform-style: preserve-3d;
+  transition: transform 0.1s linear;
+}
+
+.scene{
+  perspective: 900px;
+}
+  button{
+    margin:4px;
+    padding:8px 10px;
+    border-radius:10px;
+    border:0;
+    background:#e7e7e7;
+    cursor:pointer;
+    font-weight: 700;
+    transition: 0.15s;
+  }
+  button:hover{
+    transform: translateY(-1px);
+    background:#dcdcdc;
+  }
+
+  input, select{
+    width:100%;
+    padding:8px;
+    border-radius:10px;
+    border:1px solid #ccc;
+    margin-top:6px;
+    outline: none;
+  }
+
+  .section{ margin-bottom:16px; }
+  .label{ font-weight:bold; margin-bottom:6px; }
+
+  .drag { cursor: grab; }
+  .drag:active { cursor: grabbing; }
+
+  .hint{
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 6px;
+  }
+  
+</style>
+</head>
+<body>
+
+<h1>⚰️ Конструктор труни </h1>
+
+<div class="wrap">
+
+  <div class="card" id="scene">
+    <svg viewBox="0 0 300 520" id="svgRoot">
+
+      <defs>
+        <!-- Дерево -->
+        <linearGradient id="woodDark" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#6b3e1f"/>
+          <stop offset="100%" stop-color="#2b160a"/>
+        </linearGradient>
+
+        <linearGradient id="woodLight" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ddb07c"/>
+          <stop offset="100%" stop-color="#7a4a27"/>
+        </linearGradient>
+
+        <!-- VIP чорний -->
+        <linearGradient id="vipBlack" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2a2a2a"/>
+          <stop offset="100%" stop-color="#050505"/>
+        </linearGradient>
+
+        <!-- Метал -->
+        <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.7"/>
+          <stop offset="30%" stop-color="#cfcfcf"/>
+          <stop offset="70%" stop-color="#6d6d6d"/>
+          <stop offset="100%" stop-color="#f3f3f3" stop-opacity="0.8"/>
+        </linearGradient>
+
+        <!-- Золото -->
+        <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#fff2b0"/>
+          <stop offset="35%" stop-color="#f2c24f"/>
+          <stop offset="70%" stop-color="#a66a13"/>
+          <stop offset="100%" stop-color="#ffe08a"/>
+        </linearGradient>
+
+        <!-- Тканина -->
+        <linearGradient id="fabricRed" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#6a0d0d"/>
+          <stop offset="100%" stop-color="#190000"/>
+        </linearGradient>
+
+        <linearGradient id="fabricBlue" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#0f2a6a"/>
+          <stop offset="100%" stop-color="#050818"/>
+        </linearGradient>
+
+        <!-- Блік -->
+        <linearGradient id="gloss" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="white" stop-opacity="0.55"/>
+          <stop offset="50%" stop-color="white" stop-opacity="0"/>
+        </linearGradient>
+
+        <!-- Підсвітка -->
+        <linearGradient id="sideLight" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="white" stop-opacity="0.18"/>
+          <stop offset="40%" stop-color="white" stop-opacity="0"/>
+        </linearGradient>
+
+        <linearGradient id="sideDark" x1="1" y1="0" x2="0" y2="0">
+          <stop offset="0%" stop-color="black" stop-opacity="0.18"/>
+          <stop offset="40%" stop-color="black" stop-opacity="0"/>
+        </linearGradient>
+
+        <!-- Тінь -->
+        <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="0" dy="12" stdDeviation="10" flood-opacity="0.35"/>
+        </filter>
+
+        <!-- Текстура дерева -->
+        <filter id="woodNoise">
+          <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/>
+          <feColorMatrix type="matrix" values="
+            0.35 0 0 0 0
+            0 0.25 0 0 0
+            0 0 0.15 0 0
+            0 0 0 0.22 0"/>
+          <feComposite operator="in" in2="SourceGraphic"/>
+        </filter>
+
+      </defs>
+
+      <g id="coffinGroup" transform="translate(150,260)">
+
+        <!-- Тінь -->
+        <ellipse cx="0" cy="230" rx="92" ry="22" fill="black" opacity="0.16"/>
+
+        <!-- Основа -->
+        <path id="coffinBase"
+              d="M -70 -220 L 70 -220 L 95 -160 L 95 160 L 70 220 L -70 220 L -95 160 L -95 -160 Z"
+              fill="url(#woodDark)"
+              stroke="#1a0e07"
+              stroke-width="4"
+              filter="url(#softShadow)"/>
+
+        <!-- Текстура -->
+        <path id="woodTexture"
+              d="M -70 -220 L 70 -220 L 95 -160 L 95 160 L 70 220 L -70 220 L -95 160 L -95 -160 Z"
+              fill="url(#woodDark)"
+              opacity="0.22"
+              filter="url(#woodNoise)"/>
+
+        <!-- Бокове світло -->
+        <path id="sideGlowL"
+              d="M -70 -220 L -35 -220 L -55 220 L -70 220 Z"
+              fill="url(#sideLight)" opacity="0.85"/>
+        <path id="sideGlowR"
+              d="M 70 -220 L 35 -220 L 55 220 L 70 220 Z"
+              fill="url(#sideDark)" opacity="0.7"/>
+
+        <!-- Металевий кант -->
+        <path id="metalEdge"
+              d="M -65 -210 L 65 -210 L 88 -155 L 88 155 L 65 210 L -65 210 L -88 155 L -88 -155 Z"
+              fill="none"
+              stroke="url(#metal)"
+              stroke-width="5"
+              opacity="0.95"/>
+
+        <!-- Внутрішня тканина -->
+        <path id="innerPanel"
+              d="M -52 -190 L 52 -190 L 68 -145 L 68 145 L 52 190 L -52 190 L -68 145 L -68 -145 Z"
+              fill="url(#fabricRed)"
+              opacity="0.88"/>
+
+        <!-- Кришка -->
+        <path id="lid"
+              d="M -68 -220 L 68 -220 L 90 -160 L 90 -10 L 0 40 L -90 -10 L -90 -160 Z"
+              fill="rgba(255,255,255,0.06)"
+              stroke="rgba(255,255,255,0.18)"
+              stroke-width="2"/>
+
+        <!-- Блік -->
+        <path id="glossLayer"
+              d="M -50 -200 L 20 -200 L 45 0 L -15 0 Z"
+              fill="url(#gloss)" opacity="0.9"/>
+
+        <!-- Різьба -->
+        <g id="carvingLayer" opacity="0.55">
+          <path d="M -35 -120 Q 0 -170 35 -120 Q 0 -80 -35 -120" fill="none" stroke="url(#gold)" stroke-width="2"/>
+          <path d="M -35 120 Q 0 170 35 120 Q 0 80 -35 120" fill="none" stroke="url(#gold)" stroke-width="2"/>
+          <path d="M -25 -40 Q 0 -70 25 -40 Q 0 -10 -25 -40" fill="none" stroke="url(#gold)" stroke-width="1.6" opacity="0.6"/>
+          <path d="M -25 40 Q 0 70 25 40 Q 0 10 -25 40" fill="none" stroke="url(#gold)" stroke-width="1.6" opacity="0.6"/>
+        </g>
+
+        <!-- Гвинти -->
+        <g id="screwsLayer" opacity="0.85"></g>
+
+        <!-- Декор -->
+        <g id="decorLayer"></g>
+
+        <!-- Ручки -->
+        <g id="handlesLayer"></g>
+
+        <!-- Символи -->
+        <g id="symbolLayer"></g>
+
+        <!-- Текст -->
+        <text id="titleText"
+              x="0" y="10"
+              text-anchor="middle"
+              fill="#f5d36a"
+              font-size="18"
+              font-family="serif"
+              class="drag">Текст</text>
+
+      </g>
+    </svg>
+  </div>
+<ellipse cx="0" cy="230" rx="110" ry="30"
+fill="gold" opacity="0.15"/> <button onclick="toggleLight()">Підсвітка</button>
+  <div class="card" style="width:360px">
+
+    <div class="section">
+      <div class="label">Матеріал</div>
+      <button onclick="setMaterial('dark')">Темне дерево</button>
+      <button onclick="setMaterial('light')">Світле дерево</button>
+      <button onclick="setMaterial('vip')">VIP чорна</button>
+      <button onclick="setMaterial('blue')">Синя</button>
+      <button onclick="setMaterial('white')">Біла</button>
+    </div>
+
+    <div class="section">
+      <div class="label">Поверхня</div>
+      <button onclick="setFinish('glossy')">Глянцева</button>
+      <button onclick="setFinish('matte')">Матова</button>
+    </div>
+<div id="priceBox">Ціна: 12000 грн</div>
+    <div class="section">
+      <div class="label">Розмір</div>
+      Довжина
+      <input type="range" min="0.7" max="1.5" step="0.05" value="1" oninput="resizeCoffin()" id="lenR">
+      Ширина
+      <input type="range" min="0.7" max="1.5" step="0.05" value="1" oninput="resizeCoffin()" id="widR">
+      <div class="hint">Drag працює навіть після зміни масштабу.</div>
+    </div>
+
+    <div class="section">
+      <div class="label">Декор</div>
+      <button onclick="addDecor('cross')">Хрест</button>
+      <button onclick="addDecor('frame')">Рамка</button>
+      <button onclick="addDecor('double')">Подвійна</button>
+      <button onclick="addDecor('ornament')">Орнамент</button>
+      <button onclick="addDecor('lines')">Лінії</button>
+      <button onclick="addDecor('logika')">Logika стиль</button>
+      <button onclick="clearDecor()">Очистити</button>
+    </div>
+
+    <div class="section">
+      <div class="label">Ручки</div>
+      <button onclick="setHandles('gold')">Золоті</button>
+      <button onclick="setHandles('silver')">Срібні</button>
+      <button onclick="setHandles('black')">Чорні</button>
+      <button onclick="setHandles('none')">Без</button>
+    </div>
+
+    <div class="section">
+      <div class="label">Символ</div>
+      <button onclick="addSymbol('✝')">✝</button>
+      <button onclick="addSymbol('★')">★</button>
+      <button onclick="addSymbol('✿')">✿</button>
+      <button onclick="addSymbol('☀')">☀</button>
+      <button onclick="addSymbol('⚡')">⚡</button>
+      <button onclick="addSymbol('👑')">👑</button>
+      <button onclick="addSymbol('🕯')">🕯</button>
+      <button onclick="clearSymbols()">Очистити символи</button>
+    </div>
+
+    <div class="section">
+      <div class="label">Напис</div>
+      <input placeholder="Текст" oninput="setText(this.value)">
+      <select onchange="setFont(this.value)">
+        <option value="serif">Serif</option>
+        <option value="sans-serif">Sans</option>
+        <option value="monospace">Mono</option>
+        <option value="cursive">Script</option>
+      </select>
+    </div>
+
+    <div class="section">
+      <div class="label">Експорт</div>
+      <button onclick="saveSVG()">💾 SVG</button>
+      <button onclick="savePNG()">📸 PNG</button>
+      <button onclick="randomDesign()">🎲 Random</button>
+    </div>
+<div class="scene">
+  <div id="coffin3D" class="coffin">
+    <div class="face front"></div>
+    <div class="face back"></div>
+    <div class="face left"></div>
+    <div class="face right"></div>
+    <div class="face top"></div>
+    <div class="face bottom"></div>
+  </div>
+</div>
+  </div>
+
+</div>
+
+<script>
+
+const base = document.getElementById('coffinBase')
+const inner = document.getElementById('innerPanel')
+const gloss = document.getElementById('glossLayer')
+const lid = document.getElementById('lid')
+const metalEdge = document.getElementById('metalEdge')
+const woodTexture = document.getElementById('woodTexture')
+const carving = document.getElementById('carvingLayer')
+const screwsLayer = document.getElementById('screwsLayer')
+
+let currentFinish = "glossy"
+
+function setMaterial(type){
+  if(type==='dark'){
+    base.setAttribute('fill','url(#woodDark)')
+    woodTexture.setAttribute('fill','url(#woodDark)')
+    inner.setAttribute('fill','url(#fabricRed)')
+    carving.style.opacity = 0.55
+  }
+  if(type==='light'){
+    base.setAttribute('fill','url(#woodLight)')
+    woodTexture.setAttribute('fill','url(#woodLight)')
+    inner.setAttribute('fill','url(#fabricRed)')
+    carving.style.opacity = 0.55
+  }
+  if(type==='vip'){
+    base.setAttribute('fill','url(#vipBlack)')
+    woodTexture.setAttribute('fill','url(#vipBlack)')
+    inner.setAttribute('fill','url(#fabricBlue)')
+    carving.style.opacity = 0.75
+  }
+  if(type==='blue'){
+    base.setAttribute('fill','#2f3e6b')
+    woodTexture.setAttribute('fill','#2f3e6b')
+    inner.setAttribute('fill','url(#fabricBlue)')
+    carving.style.opacity = 0.55
+  }
+  if(type==='white'){
+    base.setAttribute('fill','#e9e9e9')
+    woodTexture.setAttribute('fill','#e9e9e9')
+    inner.setAttribute('fill','#bdbdbd')
+    carving.style.opacity = 0.35
+  }
+
+  setFinish(currentFinish)
+}
+for(let y=-150; y<=150; y+=40){
+  decorLayer.innerHTML += `
+   <circle cx="0" cy="${y}" r="4" fill="white" opacity="0.4"/>
+  ` 
+}
+function setFinish(type){
+  currentFinish = type
+  if(type==='glossy'){
+    gloss.style.opacity = 0.95
+    lid.style.opacity = 1
+    metalEdge.style.opacity = 0.95
+  }else{
+    gloss.style.opacity = 0.25
+    lid.style.opacity = 0.7
+    metalEdge.style.opacity = 0.7
+  }
+}
+function playClick(){
+  new Audio("https://www.soundjay.com/button/sounds/button-16.mp3").play()
+}
+function saveDesign(){
+  localStorage.setItem("coffinDesign", svgRoot.innerHTML)
+}
+
+/* 🎥 3D ОБЕРТАННЯ ТРУНИ МИШКОЮ */
+
+const coffin3D = document.getElementById("coffin3D")
+
+let rotX = 0
+let rotY = 0
+
+document.addEventListener("mousemove", e=>{
+  const cx = window.innerWidth/2
+  const cy = window.innerHeight/2
+
+  rotY = (e.clientX - cx)/30
+  rotX = -(e.clientY - cy)/30
+
+  coffin3D.style.transform =
+    `rotateX(${rotX}deg) rotateY(${rotY}deg)`
+})
+function loadDesign(){
+  const saved = localStorage.getItem("coffinDesign")
+  if(saved) svgRoot.innerHTML = saved
+}
+let basePrice = 12000
+
+function updatePrice(){
+  let price = basePrice
+  if(currentFinish === 'glossy') price += 1500
+  if(handlesLayer.innerHTML !== '') price += 2000
+  if(decorLayer.innerHTML !== '') price += 1000
+
+  document.getElementById("priceBox").innerText =
+    "Ціна: " + price + " грн"
+}
+function resizeCoffin(){
+  const lx = document.getElementById('lenR').value
+  const wy = document.getElementById('widR').value
+  document.getElementById('coffinGroup')
+    .setAttribute('transform',`translate(150,260) scale(${wy},${lx})`)
+}
+
+
+function clearDecor(){ decorLayer.innerHTML='' }
+
+function addDecor(t){
+  clearDecor()
+
+  if(t==='cross')
+    decorLayer.innerHTML=`<text x="0" y="-10" text-anchor="middle" font-size="48" fill="url(#gold)" opacity="0.95">✝</text>`
+
+  if(t==='frame')
+    decorLayer.innerHTML=`<rect x="-62" y="-205" width="124" height="410" fill="none" stroke="url(#gold)" stroke-width="3" opacity="0.85"/>`
+
+  if(t==='double')
+    decorLayer.innerHTML=`
+      <rect x="-62" y="-205" width="124" height="410" fill="none" stroke="url(#gold)" stroke-width="3" opacity="0.85"/>
+      <rect x="-52" y="-185" width="104" height="370" fill="none" stroke="url(#gold)" stroke-width="2" opacity="0.7"/>`
+
+  if(t==='ornament')
+    decorLayer.innerHTML=`
+      <circle cx="0" cy="-135" r="10" fill="url(#gold)" opacity="0.9"/>
+      <circle cx="0" cy="135" r="10" fill="url(#gold)" opacity="0.9"/>
+      <path d="M -18 -135 Q 0 -160 18 -135 Q 0 -115 -18 -135" fill="url(#gold)" opacity="0.55"/>
+      <path d="M -18 135 Q 0 160 18 135 Q 0 115 -18 135" fill="url(#gold)" opacity="0.55"/>`
+
+  if(t==='lines')
+    decorLayer.innerHTML=`
+      <line x1="-50" y1="-160" x2="50" y2="-160" stroke="url(#gold)" stroke-width="3" opacity="0.8"/>
+      <line x1="-50" y1="160" x2="50" y2="160" stroke="url(#gold)" stroke-width="3" opacity="0.8"/>`
+
+  if(t==='logika')
+    decorLayer.innerHTML=`
+      <text x="0" y="-155" text-anchor="middle" font-size="18" fill="#f5d36a" font-family="monospace">LOGIKA</text>
+      <rect x="-56" y="-130" width="112" height="260" fill="none" stroke="#f5d36a" stroke-width="2" opacity="0.85"/>
+      <line x1="-56" y1="-65" x2="56" y2="-65" stroke="#f5d36a" stroke-width="2" opacity="0.55"/>
+      <line x1="-56" y1="0" x2="56" y2="0" stroke="#f5d36a" stroke-width="2" opacity="0.55"/>
+      <line x1="-56" y1="65" x2="56" y2="65" stroke="#f5d36a" stroke-width="2" opacity="0.55"/>
+      <text x="0" y="170" text-anchor="middle" font-size="14" fill="#f5d36a" font-family="monospace" opacity="0.8">DESIGN</text>`
+}
+
+function setHandles(type){
+  handlesLayer.innerHTML=''
+  if(type==='none') return
+
+  let fill = 'url(#gold)'
+  let stroke = 'rgba(0,0,0,0.25)'
+
+  if(type==='silver'){ fill = '#cfd3d8' }
+  if(type==='black'){ fill = '#1a1a1a'; stroke = 'rgba(255,255,255,0.15)' }
+
+  ;[-125,-40,55].forEach(y=>{
+    handlesLayer.innerHTML += `
+      <rect x="72" y="${y}" width="24" height="10" rx="5" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
+      <rect x="-96" y="${y}" width="24" height="10" rx="5" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
+      <rect x="75" y="${y-2}" width="18" height="14" rx="7" fill="none" stroke="${stroke}" stroke-width="1" opacity="0.35"/>
+      <rect x="-93" y="${y-2}" width="18" height="14" rx="7" fill="none" stroke="${stroke}" stroke-width="1" opacity="0.35"/>
+    `
+  })
+}
+
+
+/* 🌟 ПІДСВІТКА */
+let lightEnabled = false
+
+function toggleLight(){
+  lightEnabled = !lightEnabled
+
+  if(lightEnabled){
+    svgRoot.style.filter = "drop-shadow(0 0 18px rgba(255,255,255,0.4))"
+    document.body.style.background =
+      "radial-gradient(circle at top, #ffffff, #b0b0b0)"
+  }else{
+    svgRoot.style.filter = "none"
+    document.body.style.background =
+      "radial-gradient(circle at top, #f6f6f6, #cfcfcf)"
+  }
+}
+
+/* 💰 Автооновлення ціни */
+setInterval(updatePrice, 800)
+
+/* ✨ Пульсація напису */
+let pulseDir = 1
+setInterval(()=>{
+  let fs = parseFloat(titleText.getAttribute("font-size") || 18)
+
+  if(fs > 22) pulseDir = -1
+  if(fs < 16) pulseDir = 1
+
+  titleText.setAttribute("font-size", fs + pulseDir*0.15)
+},40)
+
+
+function addSymbol(s){
+  const el = document.createElementNS('http://www.w3.org/2000/svg','text')
+  el.textContent = s
+  el.setAttribute('x', 0)
+  el.setAttribute('y', Math.random()*240 - 120)
+  el.setAttribute('fill', 'url(#gold)')
+  el.setAttribute('font-size', 26)
+  el.setAttribute('text-anchor','middle')
+  el.setAttribute('class','drag')
+  symbolLayer.appendChild(el)
+  enableDrag(el)
+}
+
+function clearSymbols(){ symbolLayer.innerHTML='' }
+
+function setText(t){ titleText.textContent = t || '' }
+function setFont(f){ titleText.setAttribute('font-family', f) }
+
+function saveSVG(){
+  const data = new XMLSerializer().serializeToString(svgRoot)
+  const blob = new Blob([data], {type:'image/svg+xml'})
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = 'coffin-design.svg'
+  a.click()
+}
+
+function savePNG(){
+  const svgData = new XMLSerializer().serializeToString(svgRoot)
+  const svgBlob = new Blob([svgData], {type:"image/svg+xml;charset=utf-8"})
+  const url = URL.createObjectURL(svgBlob)
+
+  const img = new Image()
+  img.onload = function(){
+    const canvas = document.createElement("canvas")
+    canvas.width = 1000
+    canvas.height = 1700
+    const ctx = canvas.getContext("2d")
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+
+    const a = document.createElement("a")
+    a.download = "coffin-design.png"
+    a.href = canvas.toDataURL("image/png")
+    a.click()
+
+    URL.revokeObjectURL(url)
+  }
+  img.src = url
+}
+let tiltX = 0
+let tiltY = 0
+
+document.addEventListener("mousemove", e => {
+  const cx = window.innerWidth / 2
+  const cy = window.innerHeight / 2
+
+  tiltX = (e.clientY - cy) / 60
+  tiltY = (e.clientX - cx) / 60
+
+  coffinGroup.setAttribute(
+    "transform",
+    `translate(150,260) scale(${widR.value},${lenR.value}) rotate(${tiltY/3})`
+  )
+})
+/* ✅ Правильний drag для SVG */
+function enableDrag(el){
+  let dragging = false
+
+  function getMousePosition(evt) {
+    const CTM = svgRoot.getScreenCTM()
+    return {
+      x: (evt.clientX - CTM.e) / CTM.a,
+      y: (evt.clientY - CTM.f) / CTM.d
+    }
+  }
+
+  el.addEventListener('mousedown', () => dragging = true)
+
+  window.addEventListener('mousemove', (e) => {
+    if(!dragging) return
+    const p = getMousePosition(e)
+    el.setAttribute("x", p.x - 150)
+    el.setAttribute("y", p.y - 260)
+  })
+
+  window.addEventListener('mouseup', () => dragging = false)
+}
+
+/* 🔩 Гвинти по краях */
+function generateScrews(){
+  screwsLayer.innerHTML = ""
+  const points = [
+    [-50,-185],[0,-195],[50,-185],
+    [-60,-120],[60,-120],
+    [-65,-40],[65,-40],
+    [-65,40],[65,40],
+    [-60,120],[60,120],
+    [-50,185],[0,195],[50,185],
+  ]
+
+  points.forEach(p=>{
+    screwsLayer.innerHTML += `
+      <circle cx="${p[0]}" cy="${p[1]}" r="4.5" fill="url(#metal)" opacity="0.95"/>
+      <line x1="${p[0]-2.5}" y1="${p[1]}" x2="${p[0]+2.5}" y2="${p[1]}" stroke="rgba(0,0,0,0.35)" stroke-width="1"/>
+    `
+  })
+}
+
+/* 🎲 Random стиль */
+function randomDesign(){
+  const mats = ['dark','light','vip','blue','white']
+  const decs = ['cross','frame','double','ornament','lines','logika']
+  const hands = ['gold','silver','black','none']
+  const fin = ['glossy','matte']
+
+  setMaterial(mats[Math.floor(Math.random()*mats.length)])
+  setFinish(fin[Math.floor(Math.random()*fin.length)])
+  addDecor(decs[Math.floor(Math.random()*decs.length)])
+  setHandles(hands[Math.floor(Math.random()*hands.length)])
+
+  // трохи символів
+  clearSymbols()
+  const sym = ['✝','★','✿','☀','⚡','👑','🕯']
+  const count = Math.floor(Math.random()*4)
+  for(let i=0;i<count;i++){
+    addSymbol(sym[Math.floor(Math.random()*sym.length)])
+  }
+
+  // випадковий текст
+  const texts = ["RIP", "Пам'ять", "LOGIKA", "VIP", "Спокій"]
+  setText(texts[Math.floor(Math.random()*texts.length)])
+}
+
+enableDrag(titleText)
+setHandles('gold')
+addDecor('double')
+generateScrews()
+setFinish('glossy')
+</script>
+
+</body>
+</html>
